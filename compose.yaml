@@ -1,0 +1,48 @@
+services:
+  api:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    image: sympower/eboiler
+    user: ${UID:-1000}
+    environment:
+      CADDY_GLOBAL_OPTIONS: debug
+      SERVER_NAME: ${APP_URL:-http://localhost}
+    ports:
+      - 80:80
+    volumes:
+      - .:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    image: node:22
+    ports:
+      - 5173:5173
+      - 35729:35729
+    volumes:
+      - .:/app
+    working_dir: /app
+    command:
+      - yarn
+      - dev
+
+  db:
+    image: postgres:17
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}'" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  pgdata:
