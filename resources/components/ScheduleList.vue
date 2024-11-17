@@ -77,7 +77,7 @@ const toggleStatus = (index: number) => {
             <td><span class="loading loading-ring loading-md"></span></td>
         </tr>
         <tr v-else v-for="(schedule, i) in schedules">
-            <td>{{ schedule.valid_at.split('T')[1] }}</td>
+            <td>{{ schedule.valid_at.substring(11, 19) }}</td>
             <td>{{ schedule.price }}</td>
             <td>
                 <button
